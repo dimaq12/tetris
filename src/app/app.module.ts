@@ -8,8 +8,7 @@ import { GameComponent } from './components/game/game.component';
 import { TetrisComponent } from './components/tetris/tetris.component';
 
 import { StoreModule } from '@ngrx/store';
-import { simpleReduser } from './simple.reducer';
-import { postReduser } from './reducers/post.reducer';
+
 
 
 @NgModule({
@@ -22,8 +21,6 @@ import { postReduser } from './reducers/post.reducer';
   imports: [
     BrowserModule,
     StoreModule.forRoot({
-      post: postReducer,
-      message: simpleReduser
     })
   ],
   providers: [

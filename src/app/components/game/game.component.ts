@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 
-import { Store } from '@ngrx/store'
-import { Observable } from 'rxjs/Observable'
+
 
 interface AppState{
   message: 'string';
@@ -13,20 +12,14 @@ interface AppState{
   styleUrls: ['./game.component.css']
 })
 export class GameComponent implements OnInit {
+ 
 
-  message$: Observable<string>
-
-  constructor(private store: Store <AppState>) { 
-    this.message$ = this.store.select('message');
+  constructor() { 
   }
 
-  spanishMessage(){
-    this.store.dispatch({type: "SPANISH"})
-  }
-
-  frenchMessage(){
-    this.store.dispatch({type: "FRENCH"})
-  }
+  
+  
+  
 
   ngOnInit() {
   }
