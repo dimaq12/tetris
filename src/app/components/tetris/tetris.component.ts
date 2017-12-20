@@ -17,25 +17,49 @@ enum KEY_CODE {
 
 class Player{
   pos : Position;
-  matrix : Array<any>
+  matrix : Array<any>;
+  arenaWidth: number;
+  arenaHeight: number;
+  matrixHeight: number;
+  matrixWidth: number;
+  startPosition: Position;
 
-  constructor(){
-  this.pos = {x : 0, y: 0}
+  constructor(arenaWidth, arenaHeight){
+  this.arenaWidth = arenaWidth;
+  this.arenaHeight = arenaHeight;
+  this.pos = {x: arenaWidth / 2 , y: 0}
+  this.matrixHeight = 3;
+  this.matrixWidth = 3;
+  this.startPosition = {x: arenaWidth / 2, y: 0};
   this.matrix = [
       [0, 0, 0],
       [1, 1, 1],
       [0, 1, 0]
     ];
   }
+
+  toTop(){
+    this.pos ={x: this.arenaWidth / 2 , y: 0};
+  }
+
   moveLeft(){
-    this.pos.x += 1;
-  }
-  moveRight(){
     this.pos.x -= 1;
+    if(this.pos.x < 0){
+      this.pos.x = 0
+    }
   }
+
+  moveRight(){
+    this.pos.x += 1;
+    if(this.pos.x > this.arenaWidth - this.matrixWidth){
+      this.pos.x = this.arenaWidth - this.matrixWidth;
+    }
+  }
+
   moveUp(){
     this.pos.y -= 1;
   }
+
   moveDown(){
     this.pos.y += 1;
   }
@@ -54,12 +78,16 @@ export class TetrisComponent implements AfterViewInit {
   player: Player;
   canvasEl: HTMLCanvasElement;
   arena: Array<any>;
+  arenaX: number;
+  arenaY: number;
 
   constructor(){
-   this.player = new Player()
+   this.arenaX = 24;
+   this.arenaY = 40;
+   this.player = new Player(this.arenaX, this.arenaY)
    this.dropCounter = 0;
    this.dropInterval = 1000;
-   this.arena = this.createMatrix(24, 40);
+   this.arena = this.createMatrix(this.arenaX, this.arenaY);
   }
   @HostListener('window:keyup', ['$event'])
     keyEvent(event: KeyboardEvent) {
@@ -98,7 +126,7 @@ export class TetrisComponent implements AfterViewInit {
     this.player.matrix.forEach((row, y) => {
       row.forEach((value, x) =>{
         if(value !== 0){
-          arena[y + player.pos.y][x+ player.pos.y] = value;
+          arena[y + player.pos.y][x + player.pos.x] = value;
         }
       })
     });
@@ -106,9 +134,9 @@ export class TetrisComponent implements AfterViewInit {
 
   public collide(arena, player){
     const [m, o] = [player.matrix,  player.pos];
-    for(let y; y < m.length; ++y){
-      for(let x; x < m[y].length; ++x){
-        if(m[x][y] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0){
+    for(let y = 0; y < m.length; ++y){
+      for(let x = 0; x < m[y].length; ++x){
+        if(m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0){
           return true;
         }
       }
@@ -124,13 +152,18 @@ export class TetrisComponent implements AfterViewInit {
     return matrix;
   }
 
+  public colideHandler(){
+    this.player.moveUp();
+    this.merge(this.arena, this.player);
+    console.log('to top')
+    this.player.toTop();
+    
+  }
 
   public playerDrop(){
     this.player.moveDown();
     if(this.collide(this.arena, this.player)){
-      this.player.moveUp();
-      this.merge(this.arena, this.player)
-      this.player.pos.y = 0;
+      this.colideHandler()
     }
     this.dropCounter = 0;
   }
@@ -147,13 +180,13 @@ export class TetrisComponent implements AfterViewInit {
     const deltaTime = time - this.lastTime;
     this.lastTime = time;
     this.dropCounter += 16;
-    //console.log(this.dropCounter , this.dropInterval, deltaTime)
     if(this.dropCounter >= this.dropInterval){
-      
       this.player.pos.y = this.player.pos.y + 1;
       this.dropCounter = 0;
+      if(this.collide(this.arena, this.player)){
+        this.colideHandler()
+      }
     }
-    
     window.requestAnimationFrame(this.update.bind(this))
   }
 
