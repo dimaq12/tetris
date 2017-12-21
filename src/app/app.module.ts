@@ -8,6 +8,7 @@ import { GameComponent } from './components/game/game.component';
 import { TetrisComponent } from './components/tetris/tetris.component';
 
 import { StoreModule } from '@ngrx/store';
+import { gameReducer } from './components/state/reducer';
 
 
 
@@ -20,8 +21,7 @@ import { StoreModule } from '@ngrx/store';
   ],
   imports: [
     BrowserModule,
-    StoreModule.forRoot({
-    })
+    StoreModule.forRoot({'game': gameReducer})
   ],
   providers: [
     

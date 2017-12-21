@@ -1,7 +1,15 @@
 
 import {
-  Component, Input, ElementRef, AfterViewInit, ViewChild, HostListener
+  Component, Input, ElementRef, AfterViewInit, ViewChild, HostListener, OnInit
 } from '@angular/core';
+
+import { Store } from '@ngrx/store';
+
+import { Observable } from 'rxjs/Observable';
+  
+
+import * as GameActions from '../state/actions';
+import { Game } from '../state/game.model';
 
 interface Position {
   x: number;
@@ -15,45 +23,85 @@ enum KEY_CODE {
 } 
 
 
+export class Field{
+  field: Array<any>;
+  fieldX: number;
+  fieldY: number;
+  constructor(){
+    this.fieldX = 24;
+    this.fieldY = 40;
+    this.field = this.createMatrix(this.fieldX, this.fieldY);
+  }
+
+  public createMatrix(w, h){
+    let matrix = [];
+    while(h--){
+      matrix.push(new Array(w).fill(0))
+    }
+    return matrix;
+  }
+}
+
 class Player{
   pos : Position;
   matrix : Array<any>;
-  arenaWidth: number;
-  arenaHeight: number;
+  fieldWidth: number;
+  fieldHeight: number;
   matrixHeight: number;
   matrixWidth: number;
   startPosition: Position;
 
-  constructor(arenaWidth, arenaHeight){
-  this.arenaWidth = arenaWidth;
-  this.arenaHeight = arenaHeight;
-  this.pos = {x: arenaWidth / 2 , y: 0}
-  this.matrixHeight = 3;
-  this.matrixWidth = 3;
-  this.startPosition = {x: arenaWidth / 2, y: 0};
-  this.matrix = [
+  constructor(fieldWidth, fieldHeight){
+    this.fieldWidth = fieldWidth;
+    this.fieldHeight = fieldHeight;
+    this.pos = {x: fieldWidth / 2 , y: 0}
+    this.matrixHeight = 3;
+    this.matrixWidth = 3;
+    this.startPosition = {x: fieldWidth / 2, y: 0};
+    this.matrix = [
       [0, 0, 0],
       [1, 1, 1],
       [0, 1, 0]
     ];
+
   }
 
-  toTop(){
-    this.pos ={x: this.arenaWidth / 2 , y: 0};
-  }
+  public matrixRotate(dir){
+    for(let y = 0; y < this.matrix.length; ++y){
+      for(let x = 0; x < y; ++x){
+        [
+          this.matrix[x][y],
+          this.matrix[y][x]
 
-  moveLeft(){
-    this.pos.x -= 1;
-    if(this.pos.x < 0){
-      this.pos.x = 0
+        ] = [
+          this.matrix[y][x],
+          this.matrix[x][y]
+        ];
+      }
+    }
+    if(dir > 0){
+      this.matrix.forEach(row => {row.reverse()})
+    } else {
+      this.matrix.reverse();
     }
   }
 
-  moveRight(){
-    this.pos.x += 1;
-    if(this.pos.x > this.arenaWidth - this.matrixWidth){
-      this.pos.x = this.arenaWidth - this.matrixWidth;
-    }
+  toTop(value?: number){
+    this.pos ={x: this.fieldWidth / 2 , y: 0};
+  }
+
+  moveLeft(value?: number){
+    this.pos.x -= value ? value : 1;
+    // if(this.pos.x < 0){
+    //   this.pos.x = 0
+    // }
+  }
+
+  moveRight(value?: number){
+    this.pos.x += value ? value : 1;
+    // if(this.pos.x > this.fieldWidth - this.matrixWidth){
+    //   this.pos.x = this.fieldWidth - this.matrixWidth;
+    // }
   }
 
   moveUp(){
@@ -77,31 +125,47 @@ export class TetrisComponent implements AfterViewInit {
   dropInterval: number;
   player: Player;
   canvasEl: HTMLCanvasElement;
-  arena: Array<any>;
-  arenaX: number;
-  arenaY: number;
+  field: Field;
+  game$: Observable<any>;
+  game: string;
 
-  constructor(){
-   this.arenaX = 24;
-   this.arenaY = 40;
-   this.player = new Player(this.arenaX, this.arenaY)
+  constructor(private store: Store<any>){
+   this.field = new Field()
+   this.player = new Player(this.field.fieldX, this.field.fieldY)
    this.dropCounter = 0;
    this.dropInterval = 1000;
-   this.arena = this.createMatrix(this.arenaX, this.arenaY);
+   
   }
   @HostListener('window:keyup', ['$event'])
     keyEvent(event: KeyboardEvent) {
       
       if (event.keyCode === KEY_CODE.RIGHT_ARROW) {
         this.player.moveRight()
+        if (this.collide(this.field.field, this.player)){
+          this.player.moveLeft();
+        }
+        
       }
   
       if (event.keyCode === KEY_CODE.LEFT_ARROW) {
         this.player.moveLeft();
+        if (this.collide(this.field.field, this.player)){
+          this.player.moveRight();
+        }
       }
 
       if (event.keyCode ===  KEY_CODE.UP_ARROW) {
-        
+        this.player.matrixRotate(1);
+        const game =  {
+          id: '1',
+          done: false,
+          field: this.field,
+          score: 0,
+          level: 0,
+          pause: false
+        }
+        this.store.dispatch(new GameActions.StartGame({ game }));
+        console.log(this.game$)
       }
   
       if (event.keyCode ===  KEY_CODE.DOWN_ARROW) {
@@ -114,6 +178,7 @@ export class TetrisComponent implements AfterViewInit {
   private cx: CanvasRenderingContext2D;  
   
   public ngAfterViewInit() {
+    
     // get the context
     this.canvasEl = this.canvas.nativeElement;
     this.cx = this.canvasEl.getContext('2d');
@@ -122,21 +187,36 @@ export class TetrisComponent implements AfterViewInit {
     this.update();
   }
 
-  public merge(arena, player){
+  ngOnInit(){
+    this.game$ = this.store.select('game');
+    const game =  {
+      id: '1',
+      done: false,
+      field: this.field,
+      score: 0,
+      level: 0,
+      pause: false
+    }
+    this.store.dispatch(new GameActions.StartGame({ game }));
+  } 
+
+  public merge(field, player){
     this.player.matrix.forEach((row, y) => {
       row.forEach((value, x) =>{
         if(value !== 0){
-          arena[y + player.pos.y][x + player.pos.x] = value;
+          field[y + player.pos.y][x + player.pos.x] = value;
         }
       })
     });
   }
 
-  public collide(arena, player){
+  public collide(field, player){
     const [m, o] = [player.matrix,  player.pos];
     for(let y = 0; y < m.length; ++y){
       for(let x = 0; x < m[y].length; ++x){
-        if(m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0){
+        if(m[y][x] !== 0 && 
+          (field[y + o.y] &&
+             field[y + o.y][x + o.x]) !== 0){
           return true;
         }
       }
@@ -144,25 +224,18 @@ export class TetrisComponent implements AfterViewInit {
     return false;
   }
 
-  public createMatrix(w, h){
-    let matrix = [];
-    while(h--){
-      matrix.push(new Array(w).fill(0))
-    }
-    return matrix;
-  }
+  
 
   public colideHandler(){
     this.player.moveUp();
-    this.merge(this.arena, this.player);
-    console.log('to top')
+    this.merge(this.field.field, this.player);
     this.player.toTop();
     
   }
 
   public playerDrop(){
     this.player.moveDown();
-    if(this.collide(this.arena, this.player)){
+    if(this.collide(this.field.field, this.player)){
       this.colideHandler()
     }
     this.dropCounter = 0;
@@ -172,7 +245,7 @@ export class TetrisComponent implements AfterViewInit {
     this.cx.fillStyle = "#000";
     this.cx.fillRect( 0, 0, this.canvasEl.width, this.canvasEl.height );
     this.drowMatrix(this.player.matrix, this.player.pos);
-    this.drowMatrix(this.arena, {x: 0, y: 0});
+    this.drowMatrix(this.field.field, {x: 0, y: 0});
   }
 
   public update(time: number = 0){
@@ -183,7 +256,7 @@ export class TetrisComponent implements AfterViewInit {
     if(this.dropCounter >= this.dropInterval){
       this.player.pos.y = this.player.pos.y + 1;
       this.dropCounter = 0;
-      if(this.collide(this.arena, this.player)){
+      if(this.collide(this.field.field, this.player)){
         this.colideHandler()
       }
     }

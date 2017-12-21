@@ -1,10 +1,9 @@
 import { Component, OnInit, HostListener } from '@angular/core';
+import { Store } from '@ngrx/store';
+
+import { Game } from '../state/game.model';
 
 
-
-interface AppState{
-  message: 'string';
-}
 
 @Component({
   selector: 'game',
@@ -12,9 +11,9 @@ interface AppState{
   styleUrls: ['./game.component.css']
 })
 export class GameComponent implements OnInit {
- 
 
-  constructor() { 
+
+  constructor(private store: Store<any>) { 
   }
 
   
@@ -22,6 +21,10 @@ export class GameComponent implements OnInit {
   
 
   ngOnInit() {
+    
   }
 
 }
+
+
+

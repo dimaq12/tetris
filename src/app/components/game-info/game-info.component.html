@@ -1,7 +1,8 @@
-<div (click)="decrement()" class="activity">
-  <div class="level">1</div>
-  <div class="score">234</div>
-  <div class="pause"></div>
-  <div class="restart"></div>
+<div class="activity">
+ <!-- <div class="level">{{game$.level}}</div>
+  <div class="score">{{game$.id}}</div> -->
+  <div class="start">
+    <button (click)="startGame()">Start</button>
+  </div>
 </div>
 
