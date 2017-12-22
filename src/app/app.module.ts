@@ -22,7 +22,7 @@ import { gameReducer } from './components/state/reducer';
   ],
   imports: [
     BrowserModule,
-    StoreModule.forRoot({'game': gameReducer}),
+    StoreModule.forRoot({gameReducer}),
     StoreDevtoolsModule.instrument({
       maxAge: 10
     })

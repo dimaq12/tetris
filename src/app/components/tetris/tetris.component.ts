@@ -65,7 +65,7 @@ export class TetrisComponent implements AfterViewInit {
           done: false,
           field: this.field,
           score: 0,
-          level: 0,
+          level: 8,
           pause: false
         }
         this.store.dispatch(new GameActions.StartGame({ game }));

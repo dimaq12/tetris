@@ -13,18 +13,21 @@ import { Game } from '../state/game.model';
 
 
 export class GameInfoComponent implements OnInit {
-  public game$: Observable<any>;
+  public foo: string;
+  public level: Observable<any>;
   constructor(private store: Store<any>) { 
-
   }
 
   public startGame(){
-    console.log(this.store)
-    this.game$ = this.store.select('game');
+    
   }
 
   ngOnInit() {
-    this.game$ = this.store.select('game');
+    this.store.select((state => state))
+      .subscribe( (data )=> {
+        this.level = data.gameReducer.level;
+        console.log(data.gameReducer)
+      });
   }
 }
 
