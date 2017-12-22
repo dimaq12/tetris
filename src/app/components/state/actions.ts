@@ -21,14 +21,13 @@ export class PauseGame implements Action {
 
 export class DestroyGame implements Action {
   readonly type = DESTROY_GAME;
-
   constructor(public payload: { id: string; newValue: string }) {}
 }
 
 export class UpdateCounter implements Action {
   readonly type = UPDATE_COUNTER;
 
-  constructor(public payload: { id: string; done: boolean }) {}
+  constructor(public payload: { score: 100 }) {}
 }
 
 export class UpdateLevel implements Action {

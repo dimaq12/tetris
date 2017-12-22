@@ -1,11 +1,9 @@
 import {
-  Component, Input, ElementRef, AfterViewInit, ViewChild, HostListener, OnInit
+  Component, Input, ElementRef, AfterViewInit, ViewChild, HostListener, OnChanges, OnInit
 } from '@angular/core';
 
 import { Store } from '@ngrx/store';
-
 import { Observable } from 'rxjs/Observable';
-  
 import * as GameActions from '../state/actions';
 import { Game } from '../state/game.model';
 import { Field } from '../classes/field';
@@ -24,7 +22,6 @@ enum KEY_CODE {
   styleUrls: ['./tetris.component.css']
 })
 export class TetrisComponent implements AfterViewInit {
-  // a reference to the canvas element from our template
   lastTime: number;
   dropCounter: number;
   dropInterval: number;
@@ -33,6 +30,7 @@ export class TetrisComponent implements AfterViewInit {
   field: Field;
   game$: Observable<any>;
   game: string;
+  started: boolean;
 
   constructor(private store: Store<any>){
    this.field = new Field()
@@ -40,6 +38,7 @@ export class TetrisComponent implements AfterViewInit {
    this.dropCounter = 0;
    this.dropInterval = 1000;
   }
+
   @HostListener('window:keyup', ['$event'])
     keyEvent(event: KeyboardEvent) {
       
@@ -59,17 +58,8 @@ export class TetrisComponent implements AfterViewInit {
       }
 
       if (event.keyCode ===  KEY_CODE.UP_ARROW) {
-        this.player.matrixRotate(1);
-        const game =  {
-          id: '1',
-          done: false,
-          field: this.field,
-          score: 0,
-          level: 8,
-          pause: false
-        }
-        this.store.dispatch(new GameActions.StartGame({ game }));
-        console.log(this.game$)
+        this.playerRotate()
+        console.log(this.started)
       }
   
       if (event.keyCode ===  KEY_CODE.DOWN_ARROW) {
@@ -85,20 +75,23 @@ export class TetrisComponent implements AfterViewInit {
     this.canvasEl = this.canvas.nativeElement;
     this.cx = this.canvasEl.getContext('2d');
     this.cx.scale( 20, 20 )
-    this.update();
+    this.update()
+  }
+  ngOnChanges(){
+    //console.log('is it work?')
+    //this.update();
   }
 
   ngOnInit(){
+
+    
     this.game$ = this.store.select('game');
-    const game =  {
-      id: '1',
-      done: false,
-      field: this.field,
-      score: 0,
-      level: 0,
-      pause: false
-    }
-    this.store.dispatch(new GameActions.StartGame({ game }));
+    
+    this.store.select((state => state))
+      .subscribe( (data )=> {
+        this.started = data.gameReducer.started;
+      });
+    
   } 
 
   public merge(field, player){
@@ -127,8 +120,24 @@ export class TetrisComponent implements AfterViewInit {
 
   public colideHandler(){
     this.player.moveUp();
+    this.store.dispatch(new GameActions.UpdateCounter({ score: 100 }));
     this.merge(this.field.field, this.player);
     this.player.toTop();
+  }
+
+  public playerRotate(){
+    const pos = this.player.pos.x;
+    let offset = 1;
+    this.player.matrixRotate(1);
+    while(this.collide(this.field.field, this.player)){
+      this.player.moveRight(offset);
+      offset = -(offset + (offset > 0 ? 1 : -1));
+      if (offset > this.player.matrix[0].length){
+        this.player.matrixRotate(-1);
+        this.player.pos.x = pos;
+        return
+      }
+    }
   }
 
   public playerDrop(){

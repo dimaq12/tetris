@@ -4,6 +4,17 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { gameReducer } from '../state/reducer';
 import { Game } from '../state/game.model';
+import * as GameActions from '../state/actions';
+
+
+const game =  {
+  id: '1',
+  started: true,
+  field: this.field,
+  score: 0,
+  level: 1,
+  pause: false
+}
 
 @Component({
   selector: 'game-info',
@@ -15,18 +26,20 @@ import { Game } from '../state/game.model';
 export class GameInfoComponent implements OnInit {
   public foo: string;
   public level: Observable<any>;
+  public score: Observable<any>;
   constructor(private store: Store<any>) { 
   }
 
   public startGame(){
-    
+    this.store.dispatch(new GameActions.StartGame({ game }));
   }
+
 
   ngOnInit() {
     this.store.select((state => state))
       .subscribe( (data )=> {
         this.level = data.gameReducer.level;
-        console.log(data.gameReducer)
+        this.level = data.gameReducer.score;
       });
   }
 }

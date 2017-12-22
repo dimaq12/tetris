@@ -11,6 +11,7 @@ class Player{
     matrixHeight: number;
     matrixWidth: number;
     startPosition: Position;
+    matrixMap: Object;
   
     constructor(fieldWidth, fieldHeight){
       this.fieldWidth = fieldWidth;
@@ -19,12 +20,32 @@ class Player{
       this.matrixHeight = 3;
       this.matrixWidth = 3;
       this.startPosition = { x: fieldWidth / 2, y: 0 };
-      this.matrix = [
-        [0, 0, 0],
-        [1, 1, 1],
-        [0, 1, 0]
-      ];
-  
+      this.matrixMap = {
+          A: [
+              [0, 0, 0],
+              [1, 1, 1],
+              [0, 1, 0]
+            ],
+          B: [
+              [1, 1],
+              [1, 1]
+            ],
+          C: [
+               [0, 0, 0],
+               [0, 1, 1],
+               [1, 1, 0]
+             ],
+          D: [
+               [0, 1, 1],
+               [0, 1, 0],
+               [0, 1, 0]
+            ],
+          E: [
+                [0, 1, 1],
+                [0, 1, 0],
+                [0, 1, 0]
+             ]
+      }
     }
   
     public matrixRotate(dir){
@@ -45,6 +66,10 @@ class Player{
       } else {
         this.matrix.reverse();
       }
+    }
+
+    generateMatrix(){
+
     }
   
     toTop(value?: number){

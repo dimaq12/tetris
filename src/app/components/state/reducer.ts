@@ -18,13 +18,11 @@ const newState = (state, newData) => {
 export function gameReducer(state = {}, action: GameActions.GameActions) {
     switch (action.type) {
       case GameActions.START_GAME:
-        let foo = newState({}, action.payload.game)
-        console.log(foo);
-        return foo;
+        return newState({}, action.payload.game);
       case GameActions.DESTROY_GAME:
         return state;
       case GameActions.UPDATE_COUNTER:
-        return state;
+        return newState(state, {score: state.score + action.payload.score});
       case GameActions.UPDATE_LEVEL:
         return state;
       default:
