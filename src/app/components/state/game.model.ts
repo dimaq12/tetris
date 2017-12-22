@@ -1,4 +1,4 @@
-import { Field } from '../tetris/tetris.component'
+import { Field } from '../classes/field';
 
 export interface Game {
     id: string;

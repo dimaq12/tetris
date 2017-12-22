@@ -1,4 +1,3 @@
-
 import {
   Component, Input, ElementRef, AfterViewInit, ViewChild, HostListener, OnInit
 } from '@angular/core';
@@ -7,111 +6,17 @@ import { Store } from '@ngrx/store';
 
 import { Observable } from 'rxjs/Observable';
   
-
 import * as GameActions from '../state/actions';
 import { Game } from '../state/game.model';
+import { Field } from '../classes/field';
+import { Player } from '../classes/player';
 
-interface Position {
-  x: number;
-  y: number;
-}
 enum KEY_CODE {
   LEFT_ARROW = 37,
   UP_ARROW = 38,
   RIGHT_ARROW = 39,
   DOWN_ARROW = 40
 } 
-
-
-export class Field{
-  field: Array<any>;
-  fieldX: number;
-  fieldY: number;
-  constructor(){
-    this.fieldX = 24;
-    this.fieldY = 40;
-    this.field = this.createMatrix(this.fieldX, this.fieldY);
-  }
-
-  public createMatrix(w, h){
-    let matrix = [];
-    while(h--){
-      matrix.push(new Array(w).fill(0))
-    }
-    return matrix;
-  }
-}
-
-class Player{
-  pos : Position;
-  matrix : Array<any>;
-  fieldWidth: number;
-  fieldHeight: number;
-  matrixHeight: number;
-  matrixWidth: number;
-  startPosition: Position;
-
-  constructor(fieldWidth, fieldHeight){
-    this.fieldWidth = fieldWidth;
-    this.fieldHeight = fieldHeight;
-    this.pos = {x: fieldWidth / 2 , y: 0}
-    this.matrixHeight = 3;
-    this.matrixWidth = 3;
-    this.startPosition = {x: fieldWidth / 2, y: 0};
-    this.matrix = [
-      [0, 0, 0],
-      [1, 1, 1],
-      [0, 1, 0]
-    ];
-
-  }
-
-  public matrixRotate(dir){
-    for(let y = 0; y < this.matrix.length; ++y){
-      for(let x = 0; x < y; ++x){
-        [
-          this.matrix[x][y],
-          this.matrix[y][x]
-
-        ] = [
-          this.matrix[y][x],
-          this.matrix[x][y]
-        ];
-      }
-    }
-    if(dir > 0){
-      this.matrix.forEach(row => {row.reverse()})
-    } else {
-      this.matrix.reverse();
-    }
-  }
-
-  toTop(value?: number){
-    this.pos ={x: this.fieldWidth / 2 , y: 0};
-  }
-
-  moveLeft(value?: number){
-    this.pos.x -= value ? value : 1;
-    // if(this.pos.x < 0){
-    //   this.pos.x = 0
-    // }
-  }
-
-  moveRight(value?: number){
-    this.pos.x += value ? value : 1;
-    // if(this.pos.x > this.fieldWidth - this.matrixWidth){
-    //   this.pos.x = this.fieldWidth - this.matrixWidth;
-    // }
-  }
-
-  moveUp(){
-    this.pos.y -= 1;
-  }
-
-  moveDown(){
-    this.pos.y += 1;
-  }
-}
 
 @Component({
   selector: 'tetris',
@@ -134,7 +39,6 @@ export class TetrisComponent implements AfterViewInit {
    this.player = new Player(this.field.fieldX, this.field.fieldY)
    this.dropCounter = 0;
    this.dropInterval = 1000;
-   
   }
   @HostListener('window:keyup', ['$event'])
     keyEvent(event: KeyboardEvent) {
@@ -178,11 +82,8 @@ export class TetrisComponent implements AfterViewInit {
   private cx: CanvasRenderingContext2D;  
   
   public ngAfterViewInit() {
-    
-    // get the context
     this.canvasEl = this.canvas.nativeElement;
     this.cx = this.canvasEl.getContext('2d');
-
     this.cx.scale( 20, 20 )
     this.update();
   }
@@ -224,13 +125,10 @@ export class TetrisComponent implements AfterViewInit {
     return false;
   }
 
-  
-
   public colideHandler(){
     this.player.moveUp();
     this.merge(this.field.field, this.player);
     this.player.toTop();
-    
   }
 
   public playerDrop(){
