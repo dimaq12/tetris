@@ -33,14 +33,15 @@ export class TetrisComponent implements AfterViewInit {
   started: boolean;
 
   constructor(private store: Store<any>){
-   this.field = new Field()
+   this.field = new Field(20, 30)
    this.player = new Player(this.field.fieldX, this.field.fieldY)
    this.dropCounter = 0;
    this.dropInterval = 1000;
   }
 
-  @HostListener('window:keyup', ['$event'])
+  @HostListener('window:keydown', ['$event'])
     keyEvent(event: KeyboardEvent) {
+
       
       if (event.keyCode === KEY_CODE.RIGHT_ARROW) {
         this.player.moveRight()
@@ -122,7 +123,13 @@ export class TetrisComponent implements AfterViewInit {
     this.player.moveUp();
     this.store.dispatch(new GameActions.UpdateCounter({ score: 100 }));
     this.merge(this.field.field, this.player);
+    this.field.fieldSweep()
+    this.player.generateMatrix()
     this.player.toTop();
+    if(this.collide(this.field.field, this.player)){
+      console.log('game over')
+      this.field.clearField();
+    }
   }
 
   public playerRotate(){
@@ -164,7 +171,7 @@ export class TetrisComponent implements AfterViewInit {
       this.player.pos.y = this.player.pos.y + 1;
       this.dropCounter = 0;
       if(this.collide(this.field.field, this.player)){
-        this.colideHandler()
+        this.colideHandler();
       }
     }
     window.requestAnimationFrame(this.update.bind(this))

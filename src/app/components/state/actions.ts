@@ -10,7 +10,7 @@ export const UPDATE_LEVEL = 'UPDATE_LEVEL';
 export class StartGame implements Action {
   readonly type = START_GAME;
 
-  constructor(public payload: { game: Game }) {}
+  constructor(public payload: { started: boolean }) {}
 }
 
 export class PauseGame implements Action {

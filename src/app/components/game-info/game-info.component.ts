@@ -6,16 +6,6 @@ import { gameReducer } from '../state/reducer';
 import { Game } from '../state/game.model';
 import * as GameActions from '../state/actions';
 
-
-const game =  {
-  id: '1',
-  started: true,
-  field: this.field,
-  score: 0,
-  level: 1,
-  pause: false
-}
-
 @Component({
   selector: 'game-info',
   templateUrl: './game-info.component.html',
@@ -31,10 +21,8 @@ export class GameInfoComponent implements OnInit {
   }
 
   public startGame(){
-    this.store.dispatch(new GameActions.StartGame({ game }));
+    this.store.dispatch(new GameActions.StartGame({ started: true}));
   }
-
-
   ngOnInit() {
     this.store.select((state => state))
       .subscribe( (data )=> {

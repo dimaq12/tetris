@@ -2,23 +2,28 @@
 
 
 import * as GameActions from './actions';
+import { Game } from '../state/game.model';
 
 
 
-// const defaultState: Post = {
-//     text: 'Hello. I am the default post',
-//     likes: 0
-//   }
+const game =  {
+  id: '1',
+  started: false,
+  field: this.field,
+  score: 0,
+  level: 1,
+  pause: false
+}
 
 
 const newState = (state, newData) => {
-    return Object.assign({}, state, newData)
+    return Object.assign({}, game, newData)
   }
   
-export function gameReducer(state = {}, action: GameActions.GameActions) {
+export function gameReducer(state: Game = game, action: GameActions.GameActions) {
     switch (action.type) {
       case GameActions.START_GAME:
-        return newState({}, action.payload.game);
+        return newState({}, action.payload.started);
       case GameActions.DESTROY_GAME:
         return state;
       case GameActions.UPDATE_COUNTER:
