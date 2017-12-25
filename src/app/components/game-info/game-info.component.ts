@@ -23,25 +23,25 @@ export class GameInfoComponent implements OnInit {
     this.buttonText = 'Start Game'
   }
 
-  public pauseGame(){
-    if(!this.pause){
+  public pauseGame() {
+    if (!this.pause) {
       this.buttonText = 'Start Game'
       this.store.dispatch(new GameActions.PauseGame({ pause: true }));
       return;
     }
-    if(this.pause){
+    if (this.pause) {
       this.buttonText = 'Pause Game'
       this.store.dispatch(new GameActions.RestoreGame({ pause: false }));
     }
   }
   ngOnInit() {
     this.store.select((state => state))
-      .subscribe( (data )=> {
+      .subscribe((data) => {
         this.level = data.gameReducer.level;
         this.score = data.gameReducer.score;
         this.pause = data.gameReducer.pause;
       });
-      this.store.dispatch(new GameActions.StartGame({ started: true }));
+    this.store.dispatch(new GameActions.StartGame({ started: true }));
   }
 }
 
