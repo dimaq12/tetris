@@ -6,6 +6,7 @@ interface Position {
 class Player {
   pos: Position;
   matrix: Array<any>;
+  next: Array<any>;
   fieldWidth: number;
   fieldHeight: number;
   matrixHeight: number;
