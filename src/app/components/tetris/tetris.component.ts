@@ -90,7 +90,6 @@ export class TetrisComponent implements AfterViewInit {
       .subscribe( (data )=> {
         this.started = data.gameReducer.started;
         this.pause = data.gameReducer.pause;
-        console.log(this.pause)
         this.pauseGame()
         this.restoreGame()
       });
