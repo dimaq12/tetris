@@ -17,18 +17,31 @@ export class GameInfoComponent implements OnInit {
   public foo: string;
   public level: Observable<any>;
   public score: Observable<any>;
-  constructor(private store: Store<any>) { 
+  public buttonText: string;
+  pause: boolean;
+  constructor(private store: Store<any>) {
+    this.buttonText = 'Start Game'
   }
 
-  public startGame(){
-    this.store.dispatch(new GameActions.StartGame({ started: true}));
+  public pauseGame(){
+    if(!this.pause){
+      this.buttonText = 'Start Game'
+      this.store.dispatch(new GameActions.PauseGame({ pause: true }));
+      return;
+    }
+    if(this.pause){
+      this.buttonText = 'Pause Game'
+      this.store.dispatch(new GameActions.RestoreGame({ pause: false }));
+    }
   }
   ngOnInit() {
     this.store.select((state => state))
       .subscribe( (data )=> {
         this.level = data.gameReducer.level;
-        this.level = data.gameReducer.score;
+        this.score = data.gameReducer.score;
+        this.pause = data.gameReducer.pause;
       });
+      this.store.dispatch(new GameActions.StartGame({ started: true }));
   }
 }
 

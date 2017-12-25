@@ -83,7 +83,6 @@ class Player {
   generateMatrix() {
     const figure = 'ABCDEFG'
     const code = figure[figure.length * Math.random() | 0];
-    console.log(figure.length * Math.random() | 0)
     this.matrix = this.matrixMap[code];
   }
 

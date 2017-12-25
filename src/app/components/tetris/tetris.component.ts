@@ -1,5 +1,5 @@
 import {
-  Component, Input, ElementRef, AfterViewInit, ViewChild, HostListener, OnChanges, OnInit
+  Component, Input, ElementRef, AfterViewInit, ViewChild, HostListener, OnInit
 } from '@angular/core';
 
 import { Store } from '@ngrx/store';
@@ -31,6 +31,9 @@ export class TetrisComponent implements AfterViewInit {
   game$: Observable<any>;
   game: string;
   started: boolean;
+  pause: boolean;
+  animation: any;
+  
 
   constructor(private store: Store<any>){
    this.field = new Field(20, 30)
@@ -60,7 +63,6 @@ export class TetrisComponent implements AfterViewInit {
 
       if (event.keyCode ===  KEY_CODE.UP_ARROW) {
         this.playerRotate()
-        console.log(this.started)
       }
   
       if (event.keyCode ===  KEY_CODE.DOWN_ARROW) {
@@ -78,10 +80,6 @@ export class TetrisComponent implements AfterViewInit {
     this.cx.scale( 20, 20 )
     this.update()
   }
-  ngOnChanges(){
-    //console.log('is it work?')
-    //this.update();
-  }
 
   ngOnInit(){
 
@@ -91,9 +89,28 @@ export class TetrisComponent implements AfterViewInit {
     this.store.select((state => state))
       .subscribe( (data )=> {
         this.started = data.gameReducer.started;
+        this.pause = data.gameReducer.pause;
+        console.log(this.pause)
+        this.pauseGame()
+        this.restoreGame()
       });
     
-  } 
+  }
+
+  pauseGame(){
+    if(this.pause){
+      window.cancelAnimationFrame(this.animation)
+    }
+  }
+
+  restoreGame(){
+    if(!this.pause){
+      
+      window.cancelAnimationFrame(this.animation)
+      this.animation = window.requestAnimationFrame(this.update.bind(this))
+      console.log(this.animation, 'why it is work first time?')
+    }
+  }
 
   public merge(field, player){
     this.player.matrix.forEach((row, y) => {
@@ -166,7 +183,7 @@ export class TetrisComponent implements AfterViewInit {
     this.drow()
     const deltaTime = time - this.lastTime;
     this.lastTime = time;
-    this.dropCounter += 16;
+    this.dropCounter += deltaTime | 0;
     if(this.dropCounter >= this.dropInterval){
       this.player.pos.y = this.player.pos.y + 1;
       this.dropCounter = 0;
@@ -174,7 +191,9 @@ export class TetrisComponent implements AfterViewInit {
         this.colideHandler();
       }
     }
-    window.requestAnimationFrame(this.update.bind(this))
+    if(!this.pause){
+      this.animation = window.requestAnimationFrame(this.update.bind(this))
+    }
   }
 
   public drowMatrix(matrix:Array<any>, offset){

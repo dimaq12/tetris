@@ -12,20 +12,22 @@ const game =  {
   field: this.field,
   score: 0,
   level: 1,
-  pause: false
+  pause: true
 }
 
 
 const newState = (state, newData) => {
-    return Object.assign({}, game, newData)
+    return Object.assign({}, state, newData)
   }
   
-export function gameReducer(state: Game = game, action: GameActions.GameActions) {
+export function gameReducer(state = game, action: GameActions.GameActions) {
     switch (action.type) {
       case GameActions.START_GAME:
-        return newState({}, action.payload.started);
-      case GameActions.DESTROY_GAME:
-        return state;
+        return newState(state, {started: action.payload.started} );
+      case GameActions.PAUSE_GAME:
+        return newState(state, {pause: action.payload.pause});
+      case GameActions.RESTORE_GAME:
+        return newState(state, {pause: action.payload.pause});
       case GameActions.UPDATE_COUNTER:
         return newState(state, {score: state.score + action.payload.score});
       case GameActions.UPDATE_LEVEL:

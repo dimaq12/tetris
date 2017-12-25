@@ -1,6 +1,9 @@
 <div class="activity">
+  <div class="score">
+    {{ score }}
+  </div>
   <div class="start">
-    <button (click)="startGame()">Start</button>
+    <button (click)="pauseGame()">{{ buttonText }}</button>
   </div>
 </div>
 
