@@ -12,7 +12,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 //import { EffectsModule } from '@ngrx/effects';
 import { gameReducer } from './components/state/reducer';
 
-
+import { TetrisService } from './services/tetris.service';
 
 @NgModule({
   declarations: [
@@ -29,7 +29,7 @@ import { gameReducer } from './components/state/reducer';
     })
   ],
   providers: [
-    
+    TetrisService
   ],
   bootstrap: [AppComponent]
 })
